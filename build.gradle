@@ -1,0 +1,14 @@
+subprojects {
+    ext.codebase = 'https://blog.crowbird.com/artifacts'
+    ext.homepage = 'https://blog.crowbird.com'
+    ext.vendor = 'Kroh Inc.'
+
+    ext.keystore = "${rootProject.projectDir.path}/keystore.jks"
+    ext.keystoreAlias = 'https://blog.crowbird.com'
+    ext.storepass = 'crowbird'
+
+    repositories {
+       mavenCentral()
+    }
+}
+

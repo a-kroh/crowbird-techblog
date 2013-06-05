@@ -1,0 +1,2 @@
+include 'cvs-password', 'textarea-tab-traversal', 'swing-popup-window'
+rootProject.name = 'crowbird-techblog'

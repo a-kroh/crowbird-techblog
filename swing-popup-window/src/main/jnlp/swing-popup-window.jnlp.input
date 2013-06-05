@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<jnlp 
+    spec="1.0+" 
+    codebase="@codebase@" 
+    href="@jnlpname@"
+    version="@version@">
+  <information>
+    <title>@title@</title>
+    <vendor>@vendor@</vendor>
+    <homepage href="@homepage@"/>
+
+    <description>@title@</description>
+    <description kind="short">@title@</description>
+    <description kind="tooltip">@title@</description>
+
+    <offline-allowed/>
+  </information>
+  
+  <security>
+    <all-permissions/>
+  </security>
+  
+  <resources>
+    <j2se version="@targetCompatibility@"/>
+    @jars@
+  </resources>
+  
+  <application-desc main-class="@mainclass@"/>
+</jnlp>

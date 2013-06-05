@@ -1,0 +1,25 @@
+apply plugin: 'webstart'
+
+webstart {
+    codebase = project.ext.codebase
+    homepage = project.ext.homepage
+    mainclass= 'com.krohinc.ui.util.PopupWindowExample'
+    title = 'Swing Popup Window Example'
+    vendor = project.ext.vendor
+}
+
+targetCompatibility = 1.5
+version 1.0
+
+dependencies {
+    compile project(':textarea-tab-traversal')
+}
+
+jar {
+    manifest {
+        attributes("Implementation-Title": project.webstart.title,
+                   "Implementation-Vendor": project.webstart.vendor,
+                   "Implementation-Version": version,
+                   "Main-Class": project.webstart.mainclass)
+    }
+}
