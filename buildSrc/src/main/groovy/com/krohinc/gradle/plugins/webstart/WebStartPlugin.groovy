@@ -152,19 +152,3 @@ class WebStartPlugin implements Plugin<Project> {
         }
     }
 }
-
-/**
- * Plugin extension object that becomes available as a project
- * property with the same name as this plugin. It can be used
- * to override the default settings for the plugin.
- */
-class WebStartPluginExtension {
-    String vendor = ''
-    String title = ''
-    String jnlpname = ''
-    String mainclass = ''
-    String codebase = ''
-    String homepage = ''
-    String source = 'src/main/jnlp'
-    String output = 'webstart'
-}
