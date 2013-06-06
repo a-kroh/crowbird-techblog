@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 Andrew Kroh
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.krohinc.gradle.plugins.webstart
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -13,8 +29,42 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.GradleException
 
-class WebStartPlugin implements Plugin<Project> {
-    
+/**
+ * Gradle plugin for generating a Java web start JNLP file
+ * from a template and signing all the runtime jars used in the
+ * web start application.
+ * 
+ * <p>
+ * You should place your templated JNLP file in src/main/jnlp and
+ * name it [project].jnlp.input. The following placeholders can be
+ * used in your template: {@literal @}codebase{@literal @}, 
+ * {@literal @}homepage{@literal @}, {@literal @}jnlpname{@literal @}, 
+ * {@literal @}mainclass{@literal @}, {@literal @}targetCompatibility{@literal @}, 
+ * {@literal @}title{@literal @}, {@literal @}vendor{@literal @}, 
+ * {@literal @}version{@literal @}, and {@literal @}jars{@literal @}.
+ * </p>
+ * 
+ * <p>
+ * Example build.gradle:
+ * </p>
+ * <pre>
+ * apply plugin: 'webstart'
+ * 
+ * defaultTasks 'generateJnlp'
+ * 
+ * webstart {
+ *   codebase = 'http://www.host.com/webstart'
+ *   homepage = 'http://www.host.com'
+ *   mainclass= 'com.host.app.YourClass'
+ *   title = 'Sample Application'
+ *   vendor = 'Company'
+ * }
+ * </pre>
+ * 
+ * @author Andrew Kroh
+ */
+class WebStartPlugin implements Plugin<Project> 
+{
     private static final String COPY_JARS_TASK_NAME = 'copyJars'
     
     private static final String SIGN_JARS_TASK_NAME = 'signJars'
@@ -55,31 +105,34 @@ class WebStartPlugin implements Plugin<Project> {
         final Task copyJarsTask = project.tasks[COPY_JARS_TASK_NAME]
         
         def taskArgs = [dependsOn: copyJarsTask]
-        Task signJarsTask = project.task(taskArgs, SIGN_JARS_TASK_NAME) << {
-            // Determine a list of jars to sign:
+        Task signJarsTask = project.task(taskArgs, SIGN_JARS_TASK_NAME) {
             def inputDir = project.file("${project.buildDir}/jars")
-            def inputJars = project.fileTree(dir: inputDir, include: '*.jar').files
-            
-            // Create the destination directory for the signed jars:
-            def destDir = project.file("${project.buildDir}/${project.webstart.output}")
-            destDir.mkdirs()
-            
-            // Sign the jars:
-            inputJars.each {
-                logger.info("Signing $it")
+            def outputDir = project.file("${project.buildDir}/${project.webstart.output}")
                 
-                project.ant.signjar(
-                    destDir: destDir,
-                    jar: it,
-                    keystore: project.ext.keystore,
-                    storepass: project.ext.storepass,
-                    alias: project.ext.keystoreAlias,
-                    preservelastmodified: 'true')
-            }
-
             // Define the task's inputs/outputs:
-            inputs.files(inputJars)
-            outputs.files(project.fileTree(dir: destDir, include: '*.jar').files)
+            inputs.dir inputDir
+            outputs.dir outputDir
+            
+            doLast {
+                // Determine a list of jars to sign:
+                def inputJars = project.fileTree(dir: inputDir, include: '*.jar').files
+                
+                // Ensure that the output directory exists:
+                outputDir.mkdirs()
+                
+                // Sign the jars:
+                inputJars.each {
+                    logger.info("Signing $it")
+                    
+                    project.ant.signjar(
+                        destDir: outputDir,
+                        jar: it,
+                        keystore: project.ext.keystore,
+                        storepass: project.ext.storepass,
+                        alias: project.ext.keystoreAlias,
+                        preservelastmodified: 'true')
+                }
+            }
         }
     }
     
@@ -113,14 +166,14 @@ class WebStartPlugin implements Plugin<Project> {
                 into "${project.buildDir}/${project.webstart.output}"
                 
                 def substitutionValues = [ 
-                     vendor : project.webstart.vendor,
-                     title : project.webstart.title,
+                     codebase : project.webstart.codebase,
+                     homepage : project.webstart.homepage,
                      jnlpname : project.webstart.jnlpname,
                      mainclass : project.webstart.mainclass,
-                     codebase : project.webstart.codebase,
-                     version : project.version.toString(),
-                     homepage : project.webstart.homepage,
-                     targetCompatibility : project.targetCompatibility.toString() + '+' ]
+                     targetCompatibility : project.targetCompatibility.toString() + '+',
+                     title : project.webstart.title,
+                     vendor : project.webstart.vendor,
+                     version : project.version.toString()]
                 
                 filter(ReplaceTokens, tokens: substitutionValues)
                 
