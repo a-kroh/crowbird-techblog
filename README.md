@@ -1,4 +1,4 @@
-crowbird-techblog
+crowbird-techblog ![Build Status](https://blog.crowbird.com/build-status/crowbird-techblog)
 =================
 
 What is this?
