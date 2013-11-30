@@ -11,6 +11,7 @@ webstart {
 }
 
 targetCompatibility = 1.5
+sourceCompatibility = 1.5
 version 1.0
 
 dependencies {
